@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f6f5ef">
+  <title>SLIDE LAB — 動かして、見つける不変量</title>
+  <link rel="stylesheet" href="style.css">
+  <script type="module" src="app.mjs"></script>
+</head>
+<body>
+  <main>
+    <header class="masthead"><a class="brand" href="./"><span class="brand-icon">▦</span> SLIDE LAB<span class="brand-sub">スライド・ラボ</span></a><span class="edition">PLAY × MATHEMATICS</span></header>
+    <section class="intro"><p class="eyebrow">動かすたびに、数学が見える。</p><h1>動く数字。<br class="mobile-break">変わらないひみつ。</h1><p>まずは遊んでみよう。気になったら「数理を見る」で、盤面の裏側へ。</p></section>
+    <div class="workspace" id="workspace">
+      <section class="game-panel" aria-label="スライドパズル">
+        <div class="game-top"><div class="size-select" role="group" aria-label="盤面サイズ"><button data-size="3" aria-pressed="true">3 × 3</button><button data-size="4" aria-pressed="false">4 × 4</button><button data-size="5" aria-pressed="false">5 × 5</button></div><span class="mode-label" id="mode-label">フリープレイ</span></div>
+        <div class="board-meta"><span>小さい数字から順に並べよう</span><span><strong id="moves">0</strong> <small>手</small></span></div>
+        <div class="board" id="board" role="group" aria-label="パズル盤面"></div>
+        <div class="status" id="status" role="status" aria-live="polite" aria-atomic="true"><strong id="clear-title" hidden>CLEAR!</strong><span id="status-message">空白のとなりのタイルをタップ</span></div>
+        <div class="actions"><button class="primary" id="shuffle">↻ シャッフル</button><button id="restart">最初から</button></div>
+        <div class="challenge-row"><span>もうひとつの盤面に挑戦</span><button id="challenge">チャレンジ <span aria-hidden="true">↗</span></button></div>
+        <p class="input-hint">タップ・クリックで移動 <span>／</span> 矢印キーで空白を移動</p>
+      </section>
+      <section class="math-area" aria-label="盤面の数理">
+        <div class="math-toggle-row"><div><p class="eyebrow">DISCOVER THE PATTERN</p><h2>盤面の裏側をのぞく</h2></div><button id="math-toggle" class="toggle" aria-pressed="false" aria-controls="math-content"><span>数理を見る</span><span class="switch" aria-hidden="true"></span><span id="toggle-state">OFF</span></button></div>
+        <div id="math-placeholder" class="placeholder"><div class="pattern" aria-hidden="true"><span>1</span><span>2</span><span>3</span><span>?</span></div><h3>変わるものと、変わらないもの。</h3><p>数字を動かすと、盤面の「偶数・奇数」は<br>どう変わるでしょう？</p><p class="placeholder-note">スイッチを ON にして観察しよう</p></div>
+        <div id="math-content" hidden>
+          <div class="math-note">空白を <strong id="blank-value">9</strong> 番のタイルと考えます。<br>左上から行ごとに読むと、次の置換になります。</div>
+          <div id="permutation" class="permutation" aria-label="空白を含む置換"></div>
+          <div class="metrics">
+            <article class="metric"><div class="metric-title"><span>01</span> 転倒数 <i>I</i></div><div class="metric-value"><strong id="inversions">0</strong><span id="inversions-parity"></span></div><p>左にある数 ＞ 右にある数、となるペアの数</p><div class="transition" id="inversions-change">1手動かして変化を観察</div></article>
+            <article class="metric"><div class="metric-title"><span>02</span> 空白の位置 <i>(r, c)</i></div><div class="metric-value"><strong id="position">(3, 3)</strong><span id="position-parity"></span></div><p>左上は (1, 1) · <span id="position-sum">r + c = 6</span></p><div class="transition" id="position-change">行 + 列の偶奇に注目</div></article>
+          </div>
+          <article class="invariant"><div class="invariant-top"><div><p class="eyebrow">INVARIANT / 不変量</p><h3>P = (I + r + c) mod 2</h3></div><span id="current-parity"></span></div><p id="total-equation"></p><div id="invariant-change" class="invariant-change">動かしても、この偶奇は変わりません。</div></article>
+          <div class="goal-compare"><div><span>ゴールの P</span><strong id="goal-parity"></strong></div><span class="compare-sign" id="compare-sign">＝</span><div><span>現在の P</span><strong id="compare-current"></strong></div></div>
+          <p id="comparison-note" class="comparison-note"></p>
+          <details id="history"><summary>履歴を見る <span>最近の12状態</span></summary><div class="table-scroll"><table><thead><tr><th>手数</th><th>転倒数 I</th><th>空白 (r,c)</th><th>r+c</th><th>I+r+c</th><th>パリティ</th></tr></thead><tbody id="history-body"></tbody></table></div><p class="history-note">下ほど新しい状態です。最後の列を見比べよう。</p></details>
+          <details class="explanation"><summary>なぜ変わらない？ <span>3 × 3・4 × 4・5 × 5 共通</span></summary><div class="explanation-body"><p>空白も n² 番のタイルと考えると、1回の合法手は<strong>空白と隣接タイルの1回の交換</strong>です。置換の偶奇、つまり転倒数 I の偶奇は必ず反転します。</p><p>同時に、空白は上下左右に1マス移動するため、<strong>r + c の偶奇も必ず反転</strong>します。</p><div class="proof">偶 + 偶 ↔ 奇 + 奇 → 和はずっと偶数<br>偶 + 奇 ↔ 奇 + 偶 → 和はずっと奇数</div><p>2つが一緒に反転するので、<strong>(I + r + c) mod 2 は不変</strong>です。盤面の大きさに関係なく成り立ちます。</p><p>ゴールでは I = 0、r + c = 2n なので P = 0（偶数）。ゴールと P が違う盤面は、合法手だけではゴールにたどり着けません。</p><p class="history-note">mod 2 は「2で割った余り」。0 が偶数、1 が奇数を表します。</p></div></details>
+        </div>
+      </section>
+    </div>
+    <footer><span>SLIDE LAB</span><p>ひとつ動かして、ひとつ発見。</p><span>空白にも、役割がある。</span></footer>
+  </main>
+</body>
+</html>

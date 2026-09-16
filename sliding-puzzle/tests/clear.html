@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="ja">
+<meta charset="utf-8">
+<title>CLEAR表示の回帰テスト</title>
+<style>body{font-family:system-ui}iframe{width:390px;height:850px;border:1px solid #ccc}pre{white-space:pre-wrap}</style>
+<h1>CLEAR表示の回帰テスト</h1>
+<pre id="results">実行中…</pre>
+<iframe title="実際のアプリで完成表示を検証"></iframe>
+<script type="module">
+  const output = document.querySelector('#results');
+  const frame = document.querySelector('iframe');
+  const base = new URL('../', location.href);
+  const assert = (condition, message) => { if (!condition) throw new Error(message); };
+  try {
+    const html = await (await fetch(new URL('index.html', base))).text();
+    const imports = { [new URL('logic.mjs', base).href]: new URL('tests/clear-fixture.mjs', base).href };
+    const loaded = new Promise(resolve => frame.addEventListener('load', resolve, { once: true }));
+    // Execute the unchanged application with a deterministic starting board.
+    frame.srcdoc = html.replace('<head>', `<head><base href="${base}"><script type="importmap">${JSON.stringify({ imports })}<\/script>`);
+    await loaded;
+    const doc = frame.contentDocument;
+    const $ = id => doc.getElementById(id);
+    const results = [];
+    for (const n of [3, 4, 5]) {
+      for (const mathOn of [false, true]) {
+        doc.querySelector(`[data-size="${n}"]`).click();
+        if (($('math-toggle').getAttribute('aria-pressed') === 'true') !== mathOn) $('math-toggle').click();
+        assert($('clear-title').hidden, '未完成でCLEARを表示しない');
+        assert($('moves').textContent === '0', '開始時は0手');
+        $('tile-1').click();
+        assert($('moves').textContent === '0', '無効な移動は数えない');
+        $(`tile-${n * n - 1}`).click();
+        assert(!$('clear-title').hidden && $('status').classList.contains('clear'), '完成直後にCLEARを表示');
+        assert($('clear-title').textContent === 'CLEAR!', 'CLEARの文言');
+        assert($('status-message').textContent === 'おめでとう！ 1手で完成しました', '完成手数を表示');
+        assert($('restart').textContent === 'もう一度', '再プレイを案内');
+        assert(parseFloat(frame.contentWindow.getComputedStyle($('clear-title')).fontSize) >= 40, 'CLEARは40px以上');
+        if (mathOn) {
+          assert($('inversions').textContent === '0', 'ゴールの転倒数は0');
+          assert($('position').textContent === `(${n}, ${n})`, '空白は右下');
+          assert($('current-parity').textContent === '偶数', 'ゴールの不変量は偶数');
+        }
+        // Moving away hides the banner, and completing again updates the count.
+        $(`tile-${n * n - 1}`).click();
+        assert($('clear-title').hidden, '完成形から移動するとCLEARを消す');
+        $(`tile-${n * n - 1}`).click();
+        assert($('status-message').textContent.includes('3手'), '再完成時の手数を更新');
+        $('restart').click();
+        assert($('clear-title').hidden && $('moves').textContent === '0', 'もう一度で初期状態に戻す');
+        $(`tile-${n * n - 1}`).click();
+        $('shuffle').click();
+        assert($('clear-title').hidden && $('moves').textContent === '0', 'シャッフルで再プレイ');
+        results.push(`PASS ${n}×${n} / 数理${mathOn ? 'ON' : 'OFF'}：完成・手数・再完成・もう一度・シャッフル`);
+      }
+    }
+    // Leave a completed 5×5 visible for visual inspection.
+    $('tile-24').click();
+    output.textContent = results.join('\n') + '\n6ケースすべて成功';
+  } catch (error) {
+    output.textContent = `FAIL: ${error.stack}`;
+    throw error;
+  }
+</script>
+</html>
