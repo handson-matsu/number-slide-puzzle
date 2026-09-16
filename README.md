@@ -10,11 +10,11 @@
 python3 -m http.server 8000
 ```
 
-ブラウザーで `http://localhost:8000/sliding-puzzle/` を開きます。ES Modules を使用するため、HTMLファイルを直接開くのではなくHTTPで配信してください。
+ブラウザーで `http://localhost:8000/` を開きます。ES Modules を使用するため、HTMLファイルを直接開くのではなくHTTPで配信してください。
 
 ## GitHub Pages
 
-GitHubの Settings → Pages で公開するブランチと `/ (root)` を選択すると、`https://<ユーザー名>.github.io/<リポジトリ名>/sliding-puzzle/` で利用できます。依存パッケージ・外部API・データベース・外部フォントは不要です。
+GitHub Pagesの公開設定は `main` ブランチの `/ (root)` を使用します。リポジトリ直下の `index.html` が配信され、`https://handson-matsu.github.io/number-slide-puzzle/` でアプリを利用できます。依存パッケージ・外部API・データベース・外部フォントは不要です。
 
 ## 操作
 
@@ -32,9 +32,9 @@ GitHubの Settings → Pages で公開するブランチと `/ (root)` を選択
 Node.js 18以降で実行できます。
 
 ```sh
-node --test sliding-puzzle/logic.test.mjs
+node --test logic.test.mjs
 ```
 
 3サイズそれぞれについて通常・チャレンジ各10,000手の不変性、100回のシャッフル、ゴールとの差、境界での移動を検証します。
 
-クリア表示のブラウザー回帰テストは、サーバー起動後に `http://localhost:8000/sliding-puzzle/tests/clear.html` を開くと実行されます。テスト内だけで開始盤面を完成1手前に差し替え、実際のアプリを使って全3サイズ・数理ON/OFFの6ケースで、完成表示、手数、再完成、「もう一度」「シャッフル」を検証します。通常のアプリのシャッフルには影響しません。
+クリア表示のブラウザー回帰テストは、サーバー起動後に `http://localhost:8000/tests/clear.html` を開くと実行されます。テスト内だけで開始盤面を完成1手前に差し替え、実際のアプリを使って全3サイズ・数理ON/OFFの6ケースで、完成表示、手数、再完成、「もう一度」「シャッフル」を検証します。通常のアプリのシャッフルには影響しません。
